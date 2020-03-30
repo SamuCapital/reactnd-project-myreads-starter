@@ -122,19 +122,6 @@ class BooksApp extends React.Component {
       <div className="app">
         <Switch>
           <Route
-            path="/search"
-            render={() => (
-              <Search
-                goHome={() => history.push('/')}
-                handleShelfChange={this.handleShelfChange}
-                query={query}
-                setQuery={this.setQuery}
-                queryResult={queryResult}
-                booksInShelve={[...currentlyReading, ...wantToRead, ...read]}
-              />
-            )}
-          />
-          <Route
             exact
             path="/"
             render={() => (
@@ -144,6 +131,20 @@ class BooksApp extends React.Component {
                 read={read}
                 history={history}
                 handleShelfChange={this.handleShelfChange}
+              />
+            )}
+          />
+          <Route
+            exact
+            path="/search"
+            render={() => (
+              <Search
+                goHome={() => history.push('/')}
+                handleShelfChange={this.handleShelfChange}
+                query={query}
+                setQuery={this.setQuery}
+                queryResult={queryResult}
+                booksInShelve={[...currentlyReading, ...wantToRead, ...read]}
               />
             )}
           />
