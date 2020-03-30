@@ -1,11 +1,12 @@
 import React from 'react';
-import { Route, withRouter } from 'react-router-dom';
+import { Route, withRouter, Switch } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 import './App.css';
 import * as API from './BooksAPI';
 import LandingPage from './Components/landingpage';
 import Search from './Components/Search/search';
+import errorPage from './Components/Search/404';
 
 /**
  * @description Entry Class the MyBooks App!
@@ -33,10 +34,11 @@ class BooksApp extends React.Component {
   handleQuery = () => {
     const { query } = this.state;
     try {
-      // eslint-disable-next-line no-unused-expressions
-      API.search(query).then(
-        (result) => Array.isArray(result) && this.setState({ queryResult: result }),
-      );
+      API.search(query).then((result) => {
+        Array.isArray(result)
+          ? this.setState({ queryResult: result })
+          : this.setState({ queryResult: [] });
+      });
     } catch (err) {
       // Not gonna handle that ¯\_(ツ)_/¯
     }
@@ -47,8 +49,8 @@ class BooksApp extends React.Component {
    * Using setQuery AND handleQuery in order to preserve input State after Navigation
    * @param  {} query String
    */
-  setQuery = (query) => {
-    this.setState({ query });
+  setQuery = async (query) => {
+    await this.setState({ query });
     this.handleQuery();
   };
 
@@ -76,7 +78,7 @@ class BooksApp extends React.Component {
   handleShelfChange = (bookId, oldShelf, newShelf) => {
     const b = {};
     b.id = bookId;
-    API.update(b, newShelf).then((result) => {
+    API.update(b, newShelf).then(() => {
       if (oldShelf !== 'none') {
         let { [oldShelf]: shelf } = this.state;
         shelf = shelf.filter((bookItem) => bookItem.id !== bookId);
@@ -118,32 +120,35 @@ class BooksApp extends React.Component {
     const { currentlyReading, wantToRead, read, query, queryResult } = this.state;
     return (
       <div className="app">
-        <Route
-          path="/search"
-          render={() => (
-            <Search
-              goHome={() => history.push('/')}
-              handleShelfChange={this.handleShelfChange}
-              query={query}
-              setQuery={this.setQuery}
-              queryResult={queryResult}
-              booksInShelve={[...currentlyReading, ...wantToRead, ...read]}
-            />
-          )}
-        />
-        <Route
-          exact
-          path="/"
-          render={() => (
-            <LandingPage
-              currentlyReading={currentlyReading}
-              wantToRead={wantToRead}
-              read={read}
-              history={history}
-              handleShelfChange={this.handleShelfChange}
-            />
-          )}
-        />
+        <Switch>
+          <Route
+            path="/search"
+            render={() => (
+              <Search
+                goHome={() => history.push('/')}
+                handleShelfChange={this.handleShelfChange}
+                query={query}
+                setQuery={this.setQuery}
+                queryResult={queryResult}
+                booksInShelve={[...currentlyReading, ...wantToRead, ...read]}
+              />
+            )}
+          />
+          <Route
+            exact
+            path="/"
+            render={() => (
+              <LandingPage
+                currentlyReading={currentlyReading}
+                wantToRead={wantToRead}
+                read={read}
+                history={history}
+                handleShelfChange={this.handleShelfChange}
+              />
+            )}
+          />
+          <Route component={errorPage} />
+        </Switch>
       </div>
     );
   }
